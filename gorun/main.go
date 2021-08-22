@@ -44,7 +44,7 @@ func throw(err string) {
 }
 
 func shift() string {
-	if pos < len(os.Args) {
+	if pos < len(os.Args)-1 {
 		pos++
 		return os.Args[pos]
 	}

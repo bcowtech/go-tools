@@ -168,6 +168,9 @@ func resolveResourceFileName(typename string) string {
 					break
 				}
 			}
+			if pos == 0 {
+				pos++
+			}
 			return strings.ToLower(string(runes[:pos])) + string(runes[pos:])
 		}
 	}

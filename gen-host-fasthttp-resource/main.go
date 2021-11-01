@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -96,6 +97,16 @@ func main() {
 				}
 			}
 		}
+	}
+
+	if err := execCmd("go", "mod", "tidy"); err != nil {
+		throw(err.Error())
+		os.Exit(1)
+	}
+
+	if err := execCmd("gofmt", "-w", gofile); err != nil {
+		throw(err.Error())
+		os.Exit(1)
 	}
 }
 
@@ -210,7 +221,7 @@ func importResourceModulePath(fset *token.FileSet, f *ast.File) error {
 	resourceModulePath := modulePath + "/" + RESOURCE_SUBMODULE_NAME
 	ok := astutil.AddNamedImport(fset, f, ".", resourceModulePath)
 	if ok {
-		stream, err := os.OpenFile(gofile, os.O_WRONLY, os.ModePerm)
+		stream, err := os.OpenFile(gofile, os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -231,4 +242,12 @@ func getModulePath() (string, error) {
 	modName := modfile.ModulePath(goModBytes)
 
 	return modName, nil
+}
+
+func execCmd(name string, arg ...string) error {
+	cmd := exec.Command(name, arg...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
